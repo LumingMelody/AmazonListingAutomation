@@ -1,0 +1,59 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8001:8000"  # 使用 8001 端口，避免与 BU2Ama 的 8000 冲突
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+      - ./backend/uploads:/app/uploads
+      - ./templates:/app/templates
+      # 挂载 BU2Ama 核心模块（只读）
+      - ../BU2Ama/backend/app/core:/app/bu2ama_core:ro
+      - ../BU2Ama/data:/app/bu2ama_data:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CORS_ORIGINS=http://localhost:5174
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/amazon_listing
+      - REDIS_URL=redis://redis:6379/0
+      - BU2AMA_CORE_PATH=/app/bu2ama_core
+      - BU2AMA_DATA_PATH=/app/bu2ama_data
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5174:5173"  # 使用 5174 端口，避免与 BU2Ama 的 5173 冲突
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8001
+    command: npm run dev -- --host
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"  # 使用 5433 端口，避免与默认 5432 冲突
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=amazon_listing
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"  # 使用 6380 端口，避免与默认 6379 冲突
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
