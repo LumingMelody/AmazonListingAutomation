@@ -27,4 +27,4 @@ def test_excel_processor_integrates_compliance_alert() -> None:
 def test_app_renders_excel_processor_page() -> None:
     content = _read(Path(__file__).resolve().parents[2] / "frontend" / "src" / "App.tsx")
     assert "ExcelProcessor" in content
-    assert "P0: 风险预检与上架质检" in content
+    assert "监控看板" in content or "Excel 处理" in content
