@@ -1,9 +1,10 @@
 import { Dashboard } from '@/pages/Dashboard'
 import { ExcelProcessor } from '@/pages/ExcelProcessor'
+import { ExperimentDashboard } from '@/pages/ExperimentDashboard'
 import { useState } from 'react'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'processor'>('dashboard')
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'processor' | 'experiment'>('dashboard')
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -23,6 +24,16 @@ function App() {
                 监控看板
               </button>
               <button
+                onClick={() => setCurrentPage('experiment')}
+                className={`px-4 py-2 rounded ${
+                  currentPage === 'experiment'
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                自动分层
+              </button>
+              <button
                 onClick={() => setCurrentPage('processor')}
                 className={`px-4 py-2 rounded ${
                   currentPage === 'processor'
@@ -37,7 +48,7 @@ function App() {
         </div>
       </nav>
 
-      {currentPage === 'dashboard' ? <Dashboard /> : <ExcelProcessor />}
+      {currentPage === 'dashboard' ? <Dashboard /> : currentPage === 'experiment' ? <ExperimentDashboard /> : <ExcelProcessor />}
     </div>
   )
 }
