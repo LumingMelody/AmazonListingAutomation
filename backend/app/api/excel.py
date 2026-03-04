@@ -4,10 +4,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.core.compliance_service import ComplianceService
+from app.services.bu2ama.exceptions import EngineExecutionError, EngineNotAvailableError
+from app.services.bu2ama.factory import build_engine_adapter
+from app.services.bu2ama.types import ProcessRequestDTO
 
 router = APIRouter(tags=["excel"])
 
 compliance_service = ComplianceService()
+adapter = build_engine_adapter()
 
 
 class ProcessRequest(BaseModel):
@@ -39,12 +43,26 @@ async def process_excel(request: ProcessRequest) -> Dict[str, Any]:
             }
 
     try:
-        output_file = f"processed_{request.mode}_{request.template_type}.xlsx"
+        result = adapter.process_excel(
+            ProcessRequestDTO(
+                mode=request.mode,
+                template_type=request.template_type,
+                skus=request.skus,
+                product_info=request.product_info,
+            )
+        )
+
         return {
-            "success": True,
-            "output_file": output_file,
+            "success": result.success,
+            "output_file": result.output_file,
+            "error": result.error,
+            "engine_source": result.engine_source,
             "compliance_result": compliance_result.model_dump() if compliance_result else None,
-            "qa_result": {"status": "pass", "score": 1.0},
+            "qa_result": {"status": "pass", "score": 1.0} if result.success else {"status": "fail", "score": 0.0},
         }
+    except EngineNotAvailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except EngineExecutionError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc

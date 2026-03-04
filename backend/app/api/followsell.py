@@ -4,10 +4,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.core.compliance_service import ComplianceService
+from app.services.bu2ama.exceptions import EngineExecutionError, EngineNotAvailableError
+from app.services.bu2ama.factory import build_engine_adapter
+from app.services.bu2ama.types import FollowSellRequestDTO
 
 router = APIRouter(tags=["followsell"])
 
 compliance_service = ComplianceService()
+adapter = build_engine_adapter()
 
 
 class FollowSellRequest(BaseModel):
@@ -30,11 +34,23 @@ async def process_followsell(request: FollowSellRequest) -> Dict[str, Any]:
                 "requires_approval": True,
             }
 
-        output_file = f"followsell_{request.new_file}"
+        result = adapter.process_followsell(
+            FollowSellRequestDTO(
+                old_file=request.old_file,
+                new_file=request.new_file,
+                old_listing_text=request.old_listing_text,
+            )
+        )
         return {
-            "success": True,
-            "output_file": output_file,
+            "success": result.success,
+            "output_file": result.output_file,
+            "error": result.error,
+            "engine_source": result.engine_source,
             "compliance_result": compliance_result.model_dump(),
         }
+    except EngineNotAvailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except EngineExecutionError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc

@@ -3,6 +3,7 @@
 """
 import os
 from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 # 项目根目录
@@ -18,10 +19,22 @@ DATA_DIR.mkdir(exist_ok=True)
 UPLOADS_DIR.mkdir(exist_ok=True)
 TEMPLATES_DIR.mkdir(exist_ok=True)
 
-# BU2Ama 核心引擎路径
-BU2AMA_CORE_PATH = os.getenv("BU2AMA_CORE_PATH", "../BU2Ama/backend/app/core")
-BU2AMA_DATA_PATH = os.getenv("BU2AMA_DATA_PATH", "../BU2Ama/data")
-BU2AMA_TEMPLATES_PATH = os.getenv("BU2AMA_TEMPLATES_PATH", "../BU2Ama/templates")
+# BU2Ama 核心引擎配置
+BU2AMA_ENGINE = os.getenv("BU2AMA_ENGINE", "auto")
+BU2AMA_CORE_PATH = os.getenv(
+    "BU2AMA_CORE_PATH",
+    str((BASE_DIR.parent.parent / "BU2Ama" / "backend" / "app" / "core").resolve()),
+)
+BU2AMA_DATA_PATH = os.getenv(
+    "BU2AMA_DATA_PATH",
+    str((BASE_DIR.parent.parent / "BU2Ama" / "data").resolve()),
+)
+BU2AMA_TEMPLATES_PATH = os.getenv(
+    "BU2AMA_TEMPLATES_PATH",
+    str((BASE_DIR.parent.parent / "BU2Ama" / "templates").resolve()),
+)
+BU2AMA_API_BASE_URL = os.getenv("BU2AMA_API_BASE_URL", "http://127.0.0.1:8001")
+BU2AMA_TIMEOUT_SECONDS = float(os.getenv("BU2AMA_TIMEOUT_SECONDS", "30"))
 
 
 class Settings(BaseSettings):
@@ -40,6 +53,12 @@ class Settings(BaseSettings):
 
     # 数据库配置
     database_url: str = "postgresql://postgres:postgres@localhost:5432/amazon_listing"
+
+    # BU2Ama 引擎配置
+    bu2ama_engine: str = BU2AMA_ENGINE
+    bu2ama_core_path: str = BU2AMA_CORE_PATH
+    bu2ama_api_base_url: str = BU2AMA_API_BASE_URL
+    bu2ama_timeout_seconds: float = BU2AMA_TIMEOUT_SECONDS
 
     # Redis 配置
     redis_url: str = "redis://localhost:6379/0"
