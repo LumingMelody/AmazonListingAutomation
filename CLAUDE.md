@@ -12,6 +12,33 @@ A platform for automating Amazon e-commerce operations from product selection to
 - Backend: Python 3.11+, FastAPI, PostgreSQL, Redis, Celery
 - Frontend: React 18 + TypeScript, Vite, Tailwind CSS, React Query, Zustand
 
+## Development Workflow (CRITICAL)
+
+**Role Division:**
+- **Codex**: Implements all code changes
+- **Claude**: Reviews code, provides feedback, and validates implementation
+
+**Process for New Requirements:**
+1. Discuss requirements with Codex first
+2. Codex proposes implementation approach
+3. Claude reviews and provides feedback
+4. Finalize solution together before implementation
+5. Codex implements the code
+6. Claude reviews the implementation
+
+**Never:**
+- Claude should NOT write implementation code directly
+- Claude should NOT skip the discussion phase with Codex
+- Start coding without a reviewed plan
+
+**Using Codex:**
+```bash
+# Delegate implementation to Codex
+~/.claude/skills/codex/scripts/ask_codex.sh "Your task description" \
+  --file path/to/relevant/file.py \
+  --reasoning medium
+```
+
 ## Development Commands
 
 ### Backend
