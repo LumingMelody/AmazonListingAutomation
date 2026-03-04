@@ -8,6 +8,7 @@ import logging
 
 from app.config import settings, CORS_ORIGINS
 from app.api import alerts, analytics, compliance, competitor_monitor, excel, experiments, followsell
+from app.db.session import check_database_connection
 
 # 配置日志
 logging.basicConfig(
@@ -46,9 +47,10 @@ async def root():
 @app.get("/health")
 async def health_check():
     """健康检查"""
+    db_connected = check_database_connection()
     return {
-        "status": "healthy",
-        "database": "connected",  # TODO: 实际检查数据库连接
+        "status": "healthy" if db_connected else "degraded",
+        "database": "connected" if db_connected else "disconnected",
         "redis": "connected"  # TODO: 实际检查 Redis 连接
     }
 
