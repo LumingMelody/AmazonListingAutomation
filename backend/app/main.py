@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from app.config import settings, CORS_ORIGINS
-from app.api import compliance, excel, followsell
+from app.api import alerts, compliance, excel, followsell
 
 # 配置日志
 logging.basicConfig(
@@ -73,6 +73,7 @@ async def global_exception_handler(request, exc):
 app.include_router(compliance.router)
 app.include_router(excel.router)
 app.include_router(followsell.router)
+app.include_router(alerts.router)
 # app.include_router(listing_qa.router)
 # app.include_router(workflow.router)
 
